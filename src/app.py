@@ -3,6 +3,7 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from time import sleep
+from random import randint
 
 def click_items(clickables: list):
     for clickable in clickables:
@@ -23,7 +24,16 @@ def clean_tabs(driver: WebDriver):
         
         driver.close()
 
-queries = [x.strip() for x in open('queries', 'r', encoding="utf-8").readlines()]
+def build_text_query():
+    file = open('./src/words.txt', 'r')
+    lines = file.readlines()
+    r1 = randint(0, len(lines) - 1)
+    r2 = randint(0, len(lines) - 1)
+    r3 = randint(0, len(lines) - 1)
+    
+    return f"{lines[r1].strip()} {lines[r2].strip()} {lines[r3].strip()}"
+
+queries = [f"{hash(randint(0,100))} origem" for x in range (0,30)]
 def build_query(query: str):
     splitted = query.split(" ")
     return f"https://www.bing.com/search?q={query}&form=QBLH&sp=-1&ghc=1&lq=0&pq={splitted[0]}+{splitted[1]}&sc=11-14&qs=n&sk=&cvid=9AF4D34E0A56422AA2BC643057E3D75B&ghsh=0&ghacc=0&ghpl="
@@ -56,11 +66,12 @@ limit = 90
 for query in queries:
     open_tab(driver)
     driver.switch_to.window(driver.window_handles[1])
-    driver.get(build_query(query))
+    text_query = build_text_query()
+    driver.get(build_query(text_query))
     sleep(10)
     clean_tabs(driver)
     calculated = (queries.index(query) + 1) * 3
-    print(f"SEARCH DONE FOR QUERY -> {queries.index(query)}: {calculated} score")
+    print(f"{text_query} -> {queries.index(query)}: {calculated} score")
     if calculated >= limit:
         break
 
